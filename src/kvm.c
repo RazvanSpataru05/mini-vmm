@@ -43,3 +43,15 @@ int kvm_create_vcpu(int vm_fd)
 
     return vcpu_fd;
 }
+
+void* kvm_setup_vcpu_run(int kvm_fd, int vcpu_fd)
+{
+    int mmap_size = ioctl(kvm_fd, KVM_GET_VCPU_MMAP_SIZE, 0);
+    if (mmap_size < 0) die("KVM_GET_VCPU_MMAP_SIZE error");
+
+    struct kvm_run* run = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE,
+    MAP_ANONYMOUS | MAP_PRIVATE, vcpu_fd, 0);
+    if (run == MAP_FAILED) die("mmap error");
+
+    return run;
+}
